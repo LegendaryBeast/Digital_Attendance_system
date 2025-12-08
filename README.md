@@ -248,6 +248,31 @@ sudo systemctl start mongod           # Linux
 - Mobile app (React Native)
 - Face recognition integration
 
+## Deployment
+
+### Deploying to Render (Free Tier)
+
+1. **Create Account**: Sign up at [render.com](https://render.com).
+2. **New Web Service**: Click **New +** > **Web Service**.
+3. **Connect Repo**: Select your GitHub repository.
+4. **Configure**:
+   - **Runtime**: Node
+   - **Build Command**: `npm install`
+   - **Start Command**: `node server.js`
+   - **Instance Type**: Free
+
+### Set Environment Variables
+
+On the Render dashboard, go to the **Environment** tab for your service and add these variables:
+
+| Key | Value | Description |
+|-----|-------|-------------|
+| `MONGODB_URI` | `mongodb+srv://...` | Your production MongoDB connection string (from MongoDB Atlas) |
+| `JWT_SECRET` | `...` | A secure random string (e.g., generated via `openssl rand -hex 32`) |
+| `NODE_ENV` | `production` | Optimizes the application for production |
+
+> **Note**: `PORT` is automatically set by Render. `GOOGLE_APPLICATION_CREDENTIALS` is not required for the current Excel export implementation.
+
 ## License
 
 ISC
