@@ -1,0 +1,60 @@
+================================================================================
+   📋 COPY THIS TO YOUR .env FILE
+================================================================================
+
+Add these lines to your .env file:
+
+# Cloudinary Configuration (for photo verification)
+CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
+CLOUDINARY_API_KEY=your-cloudinary-api-key
+CLOUDINARY_API_SECRET=your-cloudinary-api-secret
+
+================================================================================
+   🔑 WHERE TO GET THESE VALUES
+================================================================================
+
+1. Go to: https://cloudinary.com/
+2. Sign up for FREE account
+3. After login, click "Dashboard"
+4. You'll see:
+   
+   Cloud name: dxyz123          ← Copy this
+   API Key: 123456789012345     ← Copy this
+   API Secret: abc123xyz        ← Copy this (click "Reveal")
+
+5. Paste them into your .env file replacing the placeholder values
+
+================================================================================
+   ✅ FINAL .env FILE SHOULD LOOK LIKE:
+================================================================================
+
+PORT=3000
+MONGODB_URI=mongodb+srv://your-connection-string
+JWT_SECRET=your-secret-key
+GOOGLE_APPLICATION_CREDENTIALS=./credentials.json
+
+# Cloudinary Configuration (for photo verification)
+CLOUDINARY_CLOUD_NAME=dxyz123
+CLOUDINARY_API_KEY=123456789012345
+CLOUDINARY_API_SECRET=abc123xyz
+
+================================================================================
+   ⚠️ IMPORTANT NOTES
+================================================================================
+
+1. Never commit .env to Git (already in .gitignore)
+2. Use YOUR actual values, not the examples above
+3. No spaces around the = sign
+4. No quotes needed around values
+5. Restart server after changing .env
+
+================================================================================
+   🚀 AFTER SETUP
+================================================================================
+
+Restart your server:
+   npm run dev
+
+Then test by creating an offline class!
+
+================================================================================

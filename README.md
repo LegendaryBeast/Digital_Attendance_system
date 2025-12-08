@@ -6,10 +6,12 @@ A comprehensive location-based attendance system for Shahjalal University of Sci
 
 - 🔐 **Secure Authentication** - University email-based registration and login
 - 📍 **Location Verification** - 50-meter proximity check for offline classes using geolocation
+- 📸 **Photo Verification** - Camera-based identity verification for offline classes (NEW!)
 - 🔑 **Validation Codes** - Teacher-generated codes to prevent unauthorized attendance
 - 📊 **Google Sheets Export** - Automatic export of sorted attendance records
 - 🎨 **Modern UI** - Beautiful, responsive dark theme with glassmorphism effects
 - ⚡ **Real-time Updates** - Dynamic class management and attendance tracking
+- ☁️ **Cloud Storage** - Attendance photos stored securely on Cloudinary
 
 ## Tech Stack
 
@@ -18,6 +20,7 @@ A comprehensive location-based attendance system for Shahjalal University of Sci
 - **MongoDB** - Database with Mongoose ODM
 - **JWT** - Authentication & authorization
 - **bcryptjs** - Password hashing
+- **Cloudinary** - Cloud-based image storage
 - **Google Sheets API** - Attendance export
 
 ### Frontend
@@ -29,7 +32,8 @@ A comprehensive location-based attendance system for Shahjalal University of Sci
 
 - Node.js (v14 or higher)
 - MongoDB (v4.4 or higher)
-- Google Cloud Console account (for Sheets API)
+- Cloudinary account (for photo storage - [Free Sign Up](https://cloudinary.com/))
+- Google Cloud Console account (for Sheets API - optional)
 
 ## Installation
 
@@ -68,9 +72,30 @@ PORT=3000
 MONGODB_URI=mongodb://localhost:27017/attendance-system
 JWT_SECRET=your-secret-key-change-this-in-production
 GOOGLE_APPLICATION_CREDENTIALS=./credentials.json
+
+# Cloudinary Configuration (Required for photo verification)
+CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
+CLOUDINARY_API_KEY=your-cloudinary-api-key
+CLOUDINARY_API_SECRET=your-cloudinary-api-secret
 ```
 
-### 5. Set Up Google Sheets API (Optional but Recommended)
+### 5. Set Up Cloudinary (Required for Photo Verification)
+
+To enable camera-based attendance verification:
+
+1. Go to [Cloudinary](https://cloudinary.com/) and sign up for a free account
+2. After logging in, you'll see your **Dashboard** with credentials
+3. Copy the following from your dashboard:
+   - **Cloud Name**
+   - **API Key**  
+   - **API Secret**
+4. Add these credentials to your `.env` file (see step 4 above)
+
+**Note:** Without Cloudinary credentials, offline class attendance will fail as photo verification is mandatory.
+
+For detailed setup instructions, see [CAMERA_SETUP.md](./CAMERA_SETUP.md)
+
+### 6. Set Up Google Sheets API (Optional but Recommended)
 
 To enable attendance export to Google Sheets:
 
@@ -118,8 +143,13 @@ The server will start at `http://localhost:3000`
    - For **offline classes**:
      - Allow browser location access
      - Ensure you're within 50 meters of the teacher
+     - **Take a selfie for verification**:
+       - Click "Start Camera" to enable camera
+       - Allow browser camera permissions
+       - Click "Capture Photo" when ready
+       - Retake if needed
    - For **online classes**:
-     - No location requirement
+     - No location or photo requirement
    - Enter the validation code provided by teacher
    - Submit attendance
 

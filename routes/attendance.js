@@ -6,11 +6,12 @@ const User = require('../models/User');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { isWithinRange } = require('../utils/geolocation');
 const { exportToExcel } = require('../utils/excelExport');
+const { uploadImage } = require('../utils/cloudinaryConfig');
 
 // Submit attendance (student only)
 router.post('/submit', authenticateToken, requireRole('student'), async (req, res) => {
     try {
-        const { classId, validationCode, location } = req.body;
+        const { classId, validationCode, location, imageData } = req.body;
 
         // Validate required fields
         if (!classId || !validationCode) {
@@ -49,9 +50,19 @@ router.post('/submit', authenticateToken, requireRole('student'), async (req, re
             return res.status(400).json({ error: 'You have already submitted attendance for this class' });
         }
 
-        // For offline classes, verify location
+        // For offline classes, verify location and require image
         let distance = null;
+        let imageUrl = null;
+
         if (classData.type === 'offline') {
+            // Verify image is provided
+            if (!imageData) {
+                return res.status(400).json({
+                    error: 'Photo verification is required for offline class attendance'
+                });
+            }
+
+            // Verify location
             if (!location || !location.latitude || !location.longitude) {
                 return res.status(400).json({
                     error: 'Location is required for offline class attendance'
@@ -72,6 +83,16 @@ router.post('/submit', authenticateToken, requireRole('student'), async (req, re
             }
 
             distance = locationCheck.distance;
+
+            // Upload image to Cloudinary
+            try {
+                imageUrl = await uploadImage(imageData, `attendance/${classData._id}`);
+            } catch (error) {
+                console.error('Image upload error:', error);
+                return res.status(500).json({
+                    error: 'Failed to upload verification photo. Please try again.'
+                });
+            }
         }
 
         // Create attendance record
@@ -85,7 +106,8 @@ router.post('/submit', authenticateToken, requireRole('student'), async (req, re
                 longitude: location.longitude
             } : undefined,
             validationCodeUsed: validationCode,
-            distance
+            distance,
+            imageUrl
         });
 
         await attendance.save();
@@ -95,7 +117,8 @@ router.post('/submit', authenticateToken, requireRole('student'), async (req, re
             attendance: {
                 className: classData.name,
                 timestamp: attendance.timestamp,
-                distance: distance ? `${distance}m` : 'N/A (online class)'
+                distance: distance ? `${distance}m` : 'N/A (online class)',
+                imageUrl: imageUrl || null
             }
         });
     } catch (error) {

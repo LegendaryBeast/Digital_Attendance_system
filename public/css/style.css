@@ -746,3 +746,52 @@ a:hover {
   background: var(--bg-tertiary);
   color: var(--text-primary);
 }
+
+/* Camera Capture Styles */
+.camera-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-color);
+  aspect-ratio: 4/3;
+}
+
+#camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+#camera-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#captured-image-preview {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+}
+
+#captured-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--border-radius-lg);
+}
+
+/* Camera responsive */
+@media (max-width: 768px) {
+  .camera-container {
+    aspect-ratio: 3/4;
+  }
+}

@@ -1,6 +1,8 @@
 // API_URL is already defined in auth.js
 let currentClass = null;
 let studentLocation = null;
+let cameraStream = null;
+let capturedImageData = null;
 
 // Check authentication
 const { token, user } = getUserData();
@@ -119,9 +121,11 @@ async function openAttendanceModal(classId) {
         typeBadge.textContent = currentClass.type.toUpperCase();
         typeBadge.className = `badge badge-${currentClass.type === 'online' ? 'primary' : 'warning'}`;
 
-        // If offline class, get location
+        // If offline class, get location and show camera
         if (currentClass.type === 'offline') {
             document.getElementById('location-status').classList.remove('hidden');
+            document.getElementById('camera-section').classList.remove('hidden');
+
             document.getElementById('location-info').innerHTML = `
         <div class="flex gap-sm">
           <div class="spinner spinner-small"></div>
@@ -143,6 +147,7 @@ async function openAttendanceModal(classId) {
             }
         } else {
             document.getElementById('location-status').classList.add('hidden');
+            document.getElementById('camera-section').classList.add('hidden');
             studentLocation = null;
         }
 
@@ -154,8 +159,106 @@ async function openAttendanceModal(classId) {
     }
 }
 
+// Camera Functions
+async function startCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'user',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        });
+
+        cameraStream = stream;
+        const video = document.getElementById('camera-video');
+        video.srcObject = stream;
+
+        // Show/hide appropriate buttons
+        document.getElementById('start-camera-btn').classList.add('hidden');
+        document.getElementById('capture-photo-btn').classList.remove('hidden');
+        document.getElementById('camera-error').classList.add('hidden');
+
+        // Hide captured image if any
+        document.getElementById('captured-image-preview').classList.add('hidden');
+        video.classList.remove('hidden');
+    } catch (error) {
+        const errorDiv = document.getElementById('camera-error');
+        errorDiv.textContent = '⚠ Camera access denied. Please enable camera permissions.';
+        errorDiv.classList.remove('hidden');
+    }
+}
+
+function stopCamera() {
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+    }
+}
+
+function capturePhoto() {
+    const video = document.getElementById('camera-video');
+    const canvas = document.getElementById('camera-canvas');
+    const capturedImage = document.getElementById('captured-image');
+
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Draw video frame to canvas
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert to base64
+    capturedImageData = canvas.toDataURL('image/jpeg', 0.8);
+
+    // Display captured image
+    capturedImage.src = capturedImageData;
+    document.getElementById('captured-image-preview').classList.remove('hidden');
+
+    // Hide video
+    video.classList.add('hidden');
+
+    // Stop camera
+    stopCamera();
+
+    // Update buttons
+    document.getElementById('capture-photo-btn').classList.add('hidden');
+    document.getElementById('retake-photo-btn').classList.remove('hidden');
+
+    // Show success message
+    document.getElementById('camera-success').classList.remove('hidden');
+    document.getElementById('camera-error').classList.add('hidden');
+}
+
+function retakePhoto() {
+    capturedImageData = null;
+    document.getElementById('camera-success').classList.add('hidden');
+    document.getElementById('retake-photo-btn').classList.add('hidden');
+    document.getElementById('start-camera-btn').classList.remove('hidden');
+
+    // Clear captured image
+    document.getElementById('captured-image-preview').classList.add('hidden');
+    document.getElementById('camera-video').classList.remove('hidden');
+}
+
 // Close attendance modal
 function closeAttendanceModal() {
+    // Stop camera if running
+    stopCamera();
+
+    // Reset camera UI
+    document.getElementById('start-camera-btn').classList.remove('hidden');
+    document.getElementById('capture-photo-btn').classList.add('hidden');
+    document.getElementById('retake-photo-btn').classList.add('hidden');
+    document.getElementById('camera-success').classList.add('hidden');
+    document.getElementById('camera-error').classList.add('hidden');
+    document.getElementById('captured-image-preview').classList.add('hidden');
+    document.getElementById('camera-video').classList.remove('hidden');
+
+    // Reset variables
+    capturedImageData = null;
+
     document.getElementById('attendance-modal').classList.add('hidden');
     currentClass = null;
     studentLocation = null;
@@ -170,9 +273,16 @@ document.getElementById('submit-attendance-btn').addEventListener('click', async
         return;
     }
 
-    if (currentClass.type === 'offline' && !studentLocation) {
-        showAlert('modal-alert', 'Location is required for offline classes', 'error');
-        return;
+    if (currentClass.type === 'offline') {
+        if (!studentLocation) {
+            showAlert('modal-alert', 'Location is required for offline classes', 'error');
+            return;
+        }
+
+        if (!capturedImageData) {
+            showAlert('modal-alert', 'Please capture your photo before submitting attendance', 'error');
+            return;
+        }
     }
 
     const btnText = document.getElementById('submit-btn-text');
@@ -189,7 +299,8 @@ document.getElementById('submit-attendance-btn').addEventListener('click', async
             body: JSON.stringify({
                 classId: currentClass._id,
                 validationCode,
-                location: studentLocation
+                location: studentLocation,
+                imageData: capturedImageData
             })
         });
 
@@ -208,6 +319,11 @@ document.getElementById('submit-attendance-btn').addEventListener('click', async
         btn.disabled = false;
     }
 });
+
+// Camera button event listeners
+document.getElementById('start-camera-btn').addEventListener('click', startCamera);
+document.getElementById('capture-photo-btn').addEventListener('click', capturePhoto);
+document.getElementById('retake-photo-btn').addEventListener('click', retakePhoto);
 
 // Open history modal
 function openHistoryModal() {

@@ -248,11 +248,16 @@ async function viewAttendance(classId) {
             attendanceList.innerHTML = '<p class="text-secondary text-center" style="padding: 2rem;">No attendance records yet</p>';
         } else {
             attendanceList.innerHTML = data.attendance.map((record, index) => `
-        <div class="compact-row">
+        <div class="compact-row" style="align-items: center;">
           <div class="row-main">
             <span class="row-sl">${index + 1}</span>
             <span class="row-reg">${record.registrationNumber}</span>
             <span class="row-name">${record.studentName}</span>
+            ${record.imageUrl ? `
+              <a href="${record.imageUrl}" target="_blank" title="View photo verification" style="text-decoration: none;">
+                <img src="${record.imageUrl}" alt="Photo" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); cursor: pointer; margin-left: 0.5rem;" />
+              </a>
+            ` : ''}
           </div>
           <span class="row-time">${new Date(record.timestamp).toLocaleString('en-US', {
                 timeZone: 'Asia/Dhaka',

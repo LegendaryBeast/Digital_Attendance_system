@@ -31,6 +31,10 @@ const attendanceSchema = new mongoose.Schema({
         type: Number, // Distance in meters from teacher (for offline classes)
         default: null
     },
+    imageUrl: {
+        type: String, // Cloudinary URL of student's photo taken during attendance
+        default: null
+    },
     timestamp: {
         type: Date,
         default: Date.now
