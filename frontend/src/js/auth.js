@@ -1,4 +1,4 @@
-const API_URL = '/api';
+window.API_URL = 'http://localhost:3000/api';
 
 // Show alert message
 function showAlert(elementId, message, type) {
@@ -30,7 +30,7 @@ function getUserData() {
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = '/';
+    window.location.href = '/index.html';
 }
 
 // Check if user is logged in and redirect
@@ -38,9 +38,9 @@ function checkAuth() {
     const { token, user } = getUserData();
     if (token && user) {
         if (user.role === 'student') {
-            window.location.href = '/student';
+            window.location.href = '/student-dashboard.html';
         } else if (user.role === 'teacher') {
-            window.location.href = '/teacher';
+            window.location.href = '/teacher-dashboard.html';
         }
     }
 }
@@ -84,9 +84,9 @@ document.getElementById('login-form')?.addEventListener('submit', async (e) => {
 
             setTimeout(() => {
                 if (data.user.role === 'student') {
-                    window.location.href = '/student';
+                    window.location.href = '/student-dashboard.html';
                 } else {
-                    window.location.href = '/teacher';
+                    window.location.href = '/teacher-dashboard.html';
                 }
             }, 1000);
         } else {
@@ -132,9 +132,9 @@ document.getElementById('register-form')?.addEventListener('submit', async (e) =
 
             setTimeout(() => {
                 if (data.user.role === 'student') {
-                    window.location.href = '/student';
+                    window.location.href = '/student-dashboard.html';
                 } else {
-                    window.location.href = '/teacher';
+                    window.location.href = '/teacher-dashboard.html';
                 }
             }, 1000);
         } else {

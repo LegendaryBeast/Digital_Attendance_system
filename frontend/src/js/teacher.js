@@ -1,11 +1,11 @@
-// API_URL is already defined in auth.js
+// API_URL is defined in auth.js as window.API_URL
 let teacherLocation = null;
 let currentClassId = null;
 
 // Check authentication
 const { token, user } = getUserData();
 if (!token || !user || user.role !== 'teacher') {
-    window.location.href = '/';
+    window.location.href = '/index.html';
 }
 
 // Display teacher info

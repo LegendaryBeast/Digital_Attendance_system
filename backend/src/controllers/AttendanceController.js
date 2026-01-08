@@ -1,0 +1,94 @@
+const { exportToExcel } = require('../utils/excelExport');
+
+/**
+ * AttendanceController - Thin controller layer
+ * Only handles HTTP request/response
+ * Delegates business logic to AttendanceService
+ */
+class AttendanceController {
+    constructor(attendanceService) {
+        this.attendanceService = attendanceService;
+    }
+
+    /**
+     * Submit attendance
+     */
+    async submitAttendance(req, res) {
+        try {
+            const result = await this.attendanceService.submitAttendance(
+                req.body,
+                req.user.userId
+            );
+
+            res.status(201).json({
+                message: 'Attendance submitted successfully',
+                attendance: result
+            });
+        } catch (error) {
+            console.error('Submit attendance error:', error);
+            res.status(400).json({ error: error.message });
+        }
+    }
+
+    /**
+     * Get attendance for a class
+     */
+    async getClassAttendance(req, res) {
+        try {
+            const result = await this.attendanceService.getClassAttendance(
+                req.params.classId,
+                req.user.userId
+            );
+
+            res.json(result);
+        } catch (error) {
+            console.error('Get attendance error:', error);
+            res.status(error.message.includes('not found') ? 404 : 403)
+                .json({ error: error.message });
+        }
+    }
+
+    /**
+     * Get student's attendance history
+     */
+    async getStudentAttendance(req, res) {
+        try {
+            const result = await this.attendanceService.getStudentAttendance(req.user.userId);
+            res.json(result);
+        } catch (error) {
+            console.error('Get student attendance error:', error);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+     * Export attendance to Excel
+     */
+    async exportAttendance(req, res) {
+        try {
+            const { attendanceRecords, className } = await this.attendanceService.getAttendanceForExport(
+                req.params.classId,
+                req.user.userId
+            );
+
+            // Generate Excel file
+            const excelBuffer = await exportToExcel(attendanceRecords, className);
+
+            // Create filename
+            const date = new Date().toISOString().split('T')[0];
+            const safeClassName = className.replace(/[^a-zA-Z0-9]/g, '_');
+            const filename = `Attendance_${safeClassName}_${date}.xlsx`;
+
+            // Send file
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.send(excelBuffer);
+        } catch (error) {
+            console.error('Export attendance error:', error);
+            res.status(error.message.includes('not found') ? 404 : 403)
+                .json({ error: error.message });
+        }
+    }
+}
+
+module.exports = AttendanceController;

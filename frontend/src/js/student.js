@@ -1,4 +1,4 @@
-// API_URL is already defined in auth.js
+// API_URL is defined in auth.js as window.API_URL
 let currentClass = null;
 let studentLocation = null;
 let cameraStream = null;
@@ -7,7 +7,7 @@ let capturedImageData = null;
 // Check authentication
 const { token, user } = getUserData();
 if (!token || !user || user.role !== 'student') {
-    window.location.href = '/';
+    window.location.href = '/index.html';
 }
 
 // Display student info
